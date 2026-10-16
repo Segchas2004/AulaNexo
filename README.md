@@ -1,5 +1,11 @@
 # AulaNexo · aula virtual
 
+## Presentación en GitHub Pages
+
+La publicación se realiza automáticamente desde `main` mediante `.github/workflows/pages.yml`. Publica solamente la interfaz de `dist`, sin archivos de configuración de producción adicionales ni credenciales administrativas.
+
+Para presentar las subidas: entra como Administrador o Docente, abre un curso y selecciona su apartado. En Materiales puedes subir documentos o añadir enlaces; en Grabaciones puedes subir video. En modo demostración, los archivos quedan en IndexedDB del navegador donde se suben (hasta 50 MB por archivo). No se comparten con otros dispositivos. La interfaz lo indica; para almacenamiento compartido hay que desplegar Storage y Functions y activar el adaptador Firebase.
+
 **Estado actualizado:** consulta [ESTADO-PRODUCCION.md](ESTADO-PRODUCCION.md). El proyecto real, Authentication, Firestore y el propietario ya están preparados. Storage/Functions y el despliegue web siguen pendientes. Para revisar la interfaz: `npm ci` y `npm run dev`.
 
 Implementación navegable para secundaria, universidad y cursos independientes, con diseño azul y blanco. El nombre se puede cambiar en la marca y el título de `dist/`.

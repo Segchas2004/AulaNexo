@@ -1,5 +1,7 @@
 # Estado de preparación
 
+Publicación de presentación preparada para GitHub Pages. El sitio se mantiene explícitamente en modo demostración: las subidas locales permiten mostrar el recorrido, pero no son almacenamiento compartido de producción.
+
 Proyecto Firebase: `aulanexo-pro-20261015`.
 
 Preparado en Firebase: Authentication con Email/Password, Firestore `(default)` en `us-central1`, reglas e índices desplegados, y cuenta del propietario creada y verificada. El propietario establece su contraseña por enlace privado fuera del repositorio. No se reutilizó ni almacenó una contraseña de Google.
