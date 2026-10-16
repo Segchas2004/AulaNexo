@@ -9,5 +9,5 @@ export const config = {
   },
   "functionsRegion": "us-central1",
   "emulators": null,
-  "backendReady": false
+  "backendReady": true
 };

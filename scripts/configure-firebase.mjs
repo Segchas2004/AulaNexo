@@ -25,6 +25,6 @@ try{
   atomic(resolve(root,'dist/firebase-config.js'),'export const config = '+JSON.stringify(settings,null,2)+';\n');
   atomic(resolve(root,'.firebaserc'),JSON.stringify({projects:{default:projectId}},null,2)+'\n');
   atomic(functionsPath,updated);
-  atomic(resolve(root,'functions/.env'), 'FIREBASE_WEB_API_KEY=' + apiKey + '\n');
+  atomic(resolve(root,'functions/.env'), 'AULANEXO_WEB_API_KEY=' + apiKey + '\n');
   console.log('Configuración guardada. Falta autenticar tu cuenta de Firebase y desplegar reglas, funciones y Hosting.');
 }catch(error){console.error(error.message);process.exitCode=1;}finally{rl.close();}

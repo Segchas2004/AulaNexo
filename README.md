@@ -1,14 +1,8 @@
 # AulaNexo · aula virtual
 
-**Actualización:** el sitio público ahora utiliza ingreso real por Firebase, sin botones de demostración. Solo el propietario crea cuentas. El código de PDF para exámenes está implementado; la administración, las subidas y los exámenes reales quedan pendientes del despliegue de Functions/Storage, actualmente bloqueado por el plan Spark. Ver el estado actualizado antes de utilizarlo con alumnos.
+**Estado actual: backend desplegado y conexión real activada.** Consulta [OPERACION.md](OPERACION.md) para comenzar. La interfaz pública no incluye accesos de demostración.
 
-## Presentación en GitHub Pages
-
-La publicación se realiza automáticamente desde `main` mediante `.github/workflows/pages.yml`. Publica solamente la interfaz de `dist`, sin archivos de configuración de producción adicionales ni credenciales administrativas.
-
-Para presentar las subidas: entra como Administrador o Docente, abre un curso y selecciona su apartado. En Materiales puedes subir documentos o añadir enlaces; en Grabaciones puedes subir video. En modo demostración, los archivos quedan en IndexedDB del navegador donde se suben (hasta 50 MB por archivo). No se comparten con otros dispositivos. La interfaz lo indica; para almacenamiento compartido hay que desplegar Storage y Functions y activar el adaptador Firebase.
-
-**Estado actualizado:** consulta [ESTADO-PRODUCCION.md](ESTADO-PRODUCCION.md). El proyecto real, Authentication, Firestore y el propietario ya están preparados. Storage/Functions y el despliegue web siguen pendientes. Para revisar la interfaz: `npm ci` y `npm run dev`.
+Las secciones siguientes conservan la documentación técnica y la descripción del adaptador demo para pruebas locales; no describen el modo del sitio público actual.
 
 Implementación navegable para secundaria, universidad y cursos independientes, con diseño azul y blanco. El nombre se puede cambiar en la marca y el título de `dist/`.
 
@@ -98,7 +92,7 @@ npm run configure
 npx firebase login
 ```
 
-`configure` escribe `dist/firebase-config.js`, `.firebaserc`, la región del backend y `functions/.env` con `FIREBASE_WEB_API_KEY`. Esta API key identifica la aplicación y no es una clave privada; el servidor la usa para verificar contraseñas en el acceso por código. Si la key está restringida a orígenes de navegador, utiliza una key separada del mismo proyecto que permita la API Identity Toolkit desde el backend y configura el parámetro allí.
+`configure` escribe `dist/firebase-config.js`, `.firebaserc`, la región del backend y `functions/.env` con `AULANEXO_WEB_API_KEY`. Esta API key identifica la aplicación y no es una clave privada; el servidor la usa para verificar contraseñas en el acceso por código. Si la key está restringida a orígenes de navegador, utiliza una key separada del mismo proyecto que permita la API Identity Toolkit desde el backend y configura el parámetro allí.
 
 3. Ejecuta las comprobaciones y despliega las funciones/reglas junto con la web:
 

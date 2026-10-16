@@ -332,7 +332,7 @@ export const deleteAnnouncement = wrap(async request => {
   await db.doc(`courses/${course.id}/announcements/${identifier(request.data.id)}`).delete(); return { deleted: true };
 });
 // La contraseña la verifica Firebase Auth; el índice de códigos nunca se expone al cliente.
-const webApiKey = defineString('FIREBASE_WEB_API_KEY', { default: '' });
+const webApiKey = defineString('AULANEXO_WEB_API_KEY', { default: '' });
 export const loginWithStudentCode = wrap(async request => {
   const code = normalizeCode(request.data?.code), password = String(request.data?.password || '');
   const invalid = () => new HttpsError('unauthenticated', 'El código/correo o la contraseña no son correctos.');
