@@ -25,7 +25,7 @@ jobs:
         run: |
           mkdir -p work/pages
           cp -R dist/. work/pages/
-          rm -f work/pages/firebase-config.production.json
+          rm -f work/pages/firebase-config.production.json work/pages/demo-adapter.js
           touch work/pages/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:

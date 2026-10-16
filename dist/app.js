@@ -1,5 +1,5 @@
 import { config } from './firebase-config.js';
-import { DemoAdapter } from './demo-adapter.js';
+
 import { LEVELS, ROLES, escapeHTML as esc, canManageCourse, canManageUser, canEnroll, examAvailable, safeURL, courseModules } from './core.js';
 
 const app = document.querySelector('#app');
@@ -539,7 +539,7 @@ modal.addEventListener('cancel',event=>{event.preventDefault();if(state.exam){cl
 window.addEventListener('hashchange',async()=>{state.navOpen=false;if(state.data){try{await prepareRoster();render();}catch(error){toast(error.message,true);render();}}});
 async function boot(){
   try{
-    service=config.firebase ? new (await import('./firebase-adapter.js')).FirebaseAdapter() : new DemoAdapter();
+    service=config.firebase ? new (await import('./firebase-adapter.js')).FirebaseAdapter() : new (await import('./demo-adapter.js')).DemoAdapter();
     await service.init();if(service.currentUser)await refresh();else login();
   }catch(error){app.innerHTML=`<main class="screen-error"><p class="eyebrow">AulaNexo</p><h1>No se pudo abrir el aula.</h1><p>${esc(error.message)}</p><p>Revisa la conexión y la configuración del proyecto. Los datos reales no se sustituyen por datos de prueba.</p><button class="button primary" onclick="location.reload()">Reintentar</button></main>`;}
 }
