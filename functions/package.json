@@ -1,0 +1,9 @@
+{
+  "name": "aulanexo-functions",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
+  "engines": { "node": "22" },
+  "dependencies": { "firebase-admin": "13.10.0", "firebase-functions": "^6.4.0" },
+  "scripts": { "check": "node --check index.js" }
+}

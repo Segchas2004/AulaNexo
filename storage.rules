@@ -1,0 +1,36 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function profile() { return firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data; }
+    function active() { return request.auth != null && profile().active == true; }
+    function manager(courseId) {
+      return active() && (profile().role == 'owner' ||
+        (profile().role == 'teacher' && firestore.get(/databases/(default)/documents/courses/$(courseId)).data.teacherId == request.auth.uid));
+    }
+    function readable(courseId) {
+      return manager(courseId) || (active() && profile().role == 'student' &&
+        firestore.get(/databases/(default)/documents/courses/$(courseId)).data.published == true &&
+        firestore.exists(/databases/(default)/documents/enrollments/$(courseId + '_' + request.auth.uid)) &&
+        firestore.get(/databases/(default)/documents/enrollments/$(courseId + '_' + request.auth.uid)).data.active == true);
+    }
+    function allowedFile() {
+      return request.resource.contentType in ['application/pdf', 'text/plain', 'image/png', 'image/jpeg', 'image/webp', 'video/mp4', 'video/webm', 'audio/mpeg', 'audio/mp4',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+    }
+    match /courses/{courseId}/files/{fileId}/{filename} {
+      // Los enlaces temporales se emiten únicamente desde materialLink.
+      allow read: if false;
+      allow create: if manager(courseId) && allowedFile() && request.resource.size > 0 &&
+        (request.resource.contentType.matches('video/(mp4|webm)') ? request.resource.size <= 20 * 1024 * 1024 * 1024 : request.resource.size <= 200 * 1024 * 1024);
+      allow update, delete: if false;
+    }
+    match /submissions/{courseId}/{assignmentId}/{uid}/{fileId}/{filename} {
+      allow read: if false;
+      allow create: if active() && request.auth.uid == uid && profile().role == 'student' && readable(courseId) &&
+        firestore.get(/databases/(default)/documents/courses/$(courseId)/assignments/$(assignmentId)).data.published == true &&
+        allowedFile() && request.resource.size > 0 && request.resource.size <= 50 * 1024 * 1024;
+      allow update, delete: if false;
+    }
+    match /{allPaths=**} { allow read, write: if false; }
+  }
+}

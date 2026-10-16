@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function profile() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function active() { return signedIn() && profile().active == true; }
+    function owner() { return active() && profile().role == 'owner'; }
+    function manager(courseId) {
+      return active() && (profile().role == 'owner' ||
+        (profile().role == 'teacher' && get(/databases/$(database)/documents/courses/$(courseId)).data.teacherId == request.auth.uid));
+    }
+    function enrolled(courseId) {
+      return active() && profile().role == 'student' &&
+        exists(/databases/$(database)/documents/enrollments/$(courseId + '_' + request.auth.uid)) &&
+        get(/databases/$(database)/documents/enrollments/$(courseId + '_' + request.auth.uid)).data.active == true;
+    }
+    function courseReadable(courseId) {
+      return manager(courseId) || (enrolled(courseId) && get(/databases/$(database)/documents/courses/$(courseId)).data.published == true);
+    }
+    match /users/{uid} {
+      // El usuario puede leer su estado incluso si está suspendido, para informar del bloqueo.
+      allow get: if signedIn() && request.auth.uid == uid || owner() ||
+        (active() && profile().role == 'teacher' && request.auth.uid in resource.data.managerIds);
+      allow list: if owner() || (active() && profile().role == 'teacher' && request.auth.uid in resource.data.managerIds);
+      allow write: if false;
+    }
+    match /courses/{courseId} {
+      allow read: if active() && (profile().role == 'owner' ||
+        (profile().role == 'teacher' && resource.data.teacherId == request.auth.uid) ||
+        (enrolled(courseId) && resource.data.published == true));
+      allow write: if false;
+      match /materials/{materialId} { allow read: if courseReadable(courseId); allow write: if false; }
+      match /sessions/{sessionId} { allow read: if courseReadable(courseId); allow write: if false; }
+      match /announcements/{id} { allow read: if courseReadable(courseId); allow write: if false; }
+      match /assignments/{id} {
+        allow read: if manager(courseId) || (courseReadable(courseId) && resource.data.published == true);
+        allow write: if false;
+      }
+      match /exams/{examId} {
+        allow read: if manager(courseId) || (courseReadable(courseId) && resource.data.published == true);
+        allow write: if false;
+      }
+    }
+    match /enrollments/{id} {
+      allow read: if active() && (resource.data.uid == request.auth.uid || manager(resource.data.courseId));
+      allow write: if false;
+    }
+    match /attempts/{id} {
+      allow read: if active() && (resource.data.uid == request.auth.uid || manager(resource.data.courseId));
+      allow write: if false;
+    }
+    match /submissions/{id} {
+      allow read: if active() && (manager(resource.data.courseId) ||
+        resource.data.uid == request.auth.uid);
+      allow write: if false;
+    }
+    // Las claves de respuesta no se leen ni escriben desde ningún cliente.
+    match /examKeys/{id} { allow read, write: if false; }
+    match /attemptKeys/{id} { allow read, write: if false; }
+    match /{document=**} { allow read, write: if false; }
+  }
+}

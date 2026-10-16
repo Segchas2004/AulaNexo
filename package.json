@@ -1,0 +1,22 @@
+{
+  "name": "aulanexo",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "activate:production": "node scripts/activate-production.mjs",
+    "test": "node --test tests/core.test.mjs tests/flows.test.mjs tests/ui.test.mjs tests/academic.test.mjs",
+    "check": "node scripts/check.mjs",
+    "bootstrap": "node scripts/bootstrap-owner.mjs",
+    "configure": "node scripts/configure-firebase.mjs",
+    "test:firebase": "firebase emulators:exec --only auth,firestore,storage,functions --project demo-aulanexo \"node --test tests/firebase.test.mjs\"",
+    "test:firebase:logic": "firebase emulators:exec --only auth,firestore,storage --project demo-aulanexo \"AULANEXO_DIRECT_FUNCTION_TESTS=1 node --test tests/firebase.test.mjs\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.2",
+    "firebase": "^12.19.0",
+    "firebase-tools": "^14.27.0",
+    "jsdom": "^26.1.0"
+  }
+}

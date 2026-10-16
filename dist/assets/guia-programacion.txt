@@ -1,0 +1,21 @@
+AULANEXO — MATERIAL DE DEMOSTRACIÓN
+Programación · Universidad · Ciclo IV
+Semana 01: Algoritmos y pensamiento lógico
+
+Un algoritmo es una secuencia definida de pasos para resolver un problema.
+Antes de programar, identifica los datos de entrada, el proceso y la salida.
+
+Problema: calcular el promedio de tres notas.
+Entrada: nota1, nota2, nota3.
+Proceso: promedio = (nota1 + nota2 + nota3) / 3.
+Salida: promedio.
+
+Ejemplo en JavaScript:
+const promedio = (14 + 16 + 18) / 3;
+console.log(promedio); // 16
+
+Actividad: escribe un algoritmo que calcule el área de un rectángulo.
+Indica los datos necesarios y cómo comprobarías el resultado.
+
+Este archivo es un ejemplo para probar el aula. El contenido definitivo
+será administrado por el docente.

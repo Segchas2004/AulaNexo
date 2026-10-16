@@ -1,0 +1,21 @@
+AULANEXO — MATERIAL DE DEMOSTRACIÓN
+Matemática · Secundaria · 3.er grado
+Semana 01: Ecuaciones de primer grado
+
+Una ecuación expresa la igualdad entre dos cantidades. Para resolverla,
+aplicamos la misma operación a ambos miembros de la igualdad.
+
+Ejemplo: 2x + 4 = 10
+1. Restamos 4 a ambos miembros: 2x = 6.
+2. Dividimos ambos miembros entre 2: x = 3.
+3. Comprobamos: 2(3) + 4 = 10.
+
+Práctica:
+a) 3x + 2 = 14
+b) 5x − 7 = 18
+c) 2(x + 3) = 16
+
+Respuestas: a) x = 4; b) x = 5; c) x = 5.
+
+Este archivo permite probar la apertura de materiales. El docente puede
+subir sus propias guías desde el apartado Materiales de cada curso.
