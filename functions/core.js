@@ -134,7 +134,13 @@ export function validateExam(input) {
   const opensAt = dateValue(input.opensAt);
   const closesAt = dateValue(input.closesAt);
   if (opensAt && closesAt && opensAt >= closesAt) throw new AppError('El cierre debe ser posterior a la apertura.');
-  return { title, module: String(input.module || '').slice(0, 80), minutes, published: !!input.published, opensAt, closesAt, questions };
+  let document = null;
+  if (input.document) {
+    const d = input.document;
+    if (typeof d.path !== 'string' || d.path.includes('..') || d.path.length > 500 || d.mimetype !== 'application/pdf' || !Number.isFinite(d.size) || d.size <= 0 || d.size > 20 * 1024 ** 2) throw new AppError('Adjunta un PDF válido de hasta 20 MB.');
+    document = { path: d.path, filename: String(d.filename || 'Examen.pdf').slice(0,150), mimetype: 'application/pdf', size: d.size };
+  }
+  return { title, module: String(input.module || '').slice(0, 80), minutes, published: !!input.published, opensAt, closesAt, questions, document };
 }
 export function splitExam(exam) {
   const { questions, ...rest } = exam;

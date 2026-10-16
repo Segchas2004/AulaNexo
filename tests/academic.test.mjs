@@ -17,7 +17,7 @@ test('Carrera, sección y periodo impiden matrículas entre grupos incompatibles
   assert.equal(canEnroll(user,course),true);assert.equal(canEnroll({...user,career:'Derecho'},course),false);assert.equal(canEnroll({...user,section:'B'},course),false);assert.equal(canEnroll({...user,period:'2026-I'},course),false);
 });
 test('Los códigos son únicos y permiten ingresar sin publicar un directorio de correos',async()=>{
-  const s=await setup();const u=await s.saveUser({displayName:'Alumno con código',email:'codigo@example.com',password:'PruebaCodigo2026!',role:'student',level:'secondary',stage:'3',courseIds:['math-3'],studentCode:'alum-001'});
+  const s=await setup();await s.signInDemo('owner');const u=await s.saveUser({displayName:'Alumno con código',email:'codigo@example.com',password:'PruebaCodigo2026!',role:'student',level:'secondary',stage:'3',courseIds:['math-3'],studentCode:'alum-001'});
   assert.equal(u.studentCode,'ALUM-001');await assert.rejects(()=>s.saveUser({...u,email:'duplicado@example.com',password:'PruebaCodigo2026!'}),{code:'already-exists'});
   await s.signOut();await s.signIn('alum-001','PruebaCodigo2026!');assert.deepEqual((await s.load()).courses.map(c=>c.id),['math-3']);
 });

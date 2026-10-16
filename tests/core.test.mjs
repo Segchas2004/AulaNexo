@@ -11,6 +11,14 @@ const examInput = { title:'Evaluación inicial',minutes:30,published:true,questi
   {prompt:'Dos más dos',options:['3','4','5','6'],correct:1,points:1},
   {prompt:'Tres por tres',options:['6','9','12','15'],correct:1,points:3},
 ] };
+
+test('El PDF del examen acepta únicamente documentos limitados y conserva metadatos seguros',()=>{
+  const document={path:'courses/math/files/id/examen.pdf',filename:'Examen.pdf',size:2000,mimetype:'application/pdf',url:'https://externo.example/no-admitido'};
+  const validated=validateExam({...examInput,document});
+  assert.equal(validated.document.path,document.path);
+  assert.equal('url' in validated.document,false);
+  for(const bad of [{...document,path:'../privado.pdf'},{...document,mimetype:'text/html'},{...document,size:21*1024**2},{...document,size:-1}])assert.throws(()=>validateExam({...examInput,document:bad}));
+});
 test('Una matrícula habilita el curso solo a su titular activo',()=>{
   assert.equal(canReadCourse(student,course,[enrollment]),true);
   assert.equal(canReadCourse({...student,id:'other'},course,[enrollment]),false);

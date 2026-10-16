@@ -135,7 +135,7 @@ export class DemoAdapter {
     return course;
   }
   async saveUser(raw, id = null) {
-    const actor = this.actor(); const input = validateUserInput(raw, { passwordRequired: !id });
+    const actor = this.actor(); if(!id && actor.role !== 'owner')throw new AppError('Solo el administrador puede crear accesos.','permission-denied'); const input = validateUserInput(raw, { passwordRequired: !id });
     validateProvision(actor, input, this.state.courses);
     const existing = id && this.state.users.find(u => u.id === id);
     input.studentCode ||= existing?.studentCode || (input.role === 'student' ? 'AN-' + crypto.randomUUID().slice(0, 8).toUpperCase() : '');
@@ -245,7 +245,7 @@ export class DemoAdapter {
     if (previous) return { attempt: clone(previous), serverNow: this.clock() };
     if (!exam || !examAvailable(exam, this.clock())) throw new AppError('El examen no está disponible en este momento.');
     const attempt = { id: `${actor.id}_${examId}`, uid: actor.id, displayName: actor.displayName, module: exam.module, courseId, examId, title: exam.title,
-      questions: clone(exam.questions), answers: {}, status: 'in-progress', startedAt: this.clock(), deadlineAt: deadlineFor(exam, this.clock()) };
+      questions: clone(exam.questions), document: clone(exam.document || null), answers: {}, status: 'in-progress', startedAt: this.clock(), deadlineAt: deadlineFor(exam, this.clock()) };
     this.state.attempts.push(attempt); this.state.attemptKeys[attempt.id] = clone(this.state.examKeys[examId]); this.persist();
     return { attempt: clone(attempt), serverNow: this.clock() };
   }
@@ -258,6 +258,14 @@ export class DemoAdapter {
     const a = this.attempt(id);
     if (a.status !== 'in-progress' || this.clock() >= a.deadlineAt) throw new AppError('El tiempo para responder terminó.', 'deadline-exceeded');
     a.answers = { ...a.answers, ...sanitizeAnswers(a.questions, answers) }; this.persist(); return { saved: true };
+  }
+  async examDocumentLink(id) {
+    const a = this.attempt(id);
+    if (a.status !== 'in-progress' || this.clock() >= a.deadlineAt || !a.document) throw new AppError('El PDF solo está disponible durante el examen.');
+    const db = await this.fileDB();
+    const file = await new Promise((resolve,reject) => { const r=db.transaction('files').objectStore('files').get(a.document.path);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error); });
+    db.close();if(!file)throw new AppError('PDF no disponible.');
+    return {url:URL.createObjectURL(file),watermark:`${a.displayName} · ${a.uid}`};
   }
   async submitExam(id, answers) {
     const a = this.attempt(id); if (a.status === 'graded') return clone(a);

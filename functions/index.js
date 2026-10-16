@@ -86,6 +86,7 @@ async function saveProfile(actor, input, uid, previous = null) {
 }
 export const adminCreateUser = wrap(async request => {
   const actor = await actorOf(request); const input = validateUserInput(request.data || {});
+  if (actor.role !== 'owner') throw new HttpsError('permission-denied', 'Solo el administrador puede crear accesos.');
   input.studentCode ||= input.role === 'student' ? 'AN-' + randomUUID().slice(0, 8).toUpperCase() : '';
   validateProvision(actor, input, await selectedCourses(input.courseIds));
   // Mantener la cuenta deshabilitada hasta que perfil y matrículas estén guardados.
@@ -178,6 +179,12 @@ export const materialLink = wrap(async request => {
 export const saveExam = wrap(async request => {
   const actor = await actorOf(request); const course = await courseOf(actor, request.data.courseId, true);
   const input = validateExam(request.data); input.module = resolveModule(course, request.data.module);
+  if (input.document) {
+    if (!input.document.path.startsWith(`courses/${course.id}/files/`)) throw new HttpsError('invalid-argument', 'El PDF no corresponde al curso.');
+    const [metadata] = await getStorage().bucket().file(input.document.path).getMetadata();
+    if (metadata.contentType !== 'application/pdf' || Number(metadata.size) > 20 * 1024 ** 2 || Number(metadata.size) <= 0) throw new HttpsError('invalid-argument', 'Adjunta un PDF de hasta 20 MB.');
+    input.document.size = Number(metadata.size);
+  }
   const { publicExam, keys } = splitExam(input);
   const ref = request.data.id ? db.doc(`courses/${course.id}/exams/${identifier(request.data.id)}`) : db.collection(`courses/${course.id}/exams`).doc();
   if (request.data.id && !(await ref.get()).exists) throw new HttpsError('not-found', 'Examen no encontrado.');
@@ -205,7 +212,7 @@ export const startExam = wrap(async request => {
     const exam = docData(examSnapshot);
     if (!exam || !keys.exists || keys.data().courseId !== course.id || !examAvailable(exam, serverNow)) throw new HttpsError('failed-precondition', 'El examen no está disponible en este momento.');
     const a = { uid: actor.id, displayName: actor.displayName, courseId: course.id, examId, module: exam.module, title: exam.title,
-      questions: exam.questions, answers: {}, status: 'in-progress', startedAt: serverNow, deadlineAt: deadlineFor(exam, serverNow) };
+      questions: exam.questions, document: exam.document || null, answers: {}, status: 'in-progress', startedAt: serverNow, deadlineAt: deadlineFor(exam, serverNow) };
     tx.set(ref, a); tx.set(db.doc(`attemptKeys/${ref.id}`), { keys: keys.data().keys }); return { id: ref.id, ...a };
   }); return { attempt, serverNow };
 });
@@ -214,6 +221,16 @@ async function checkAttempt(actor, attemptId) {
   if (!a || a.uid !== actor.id || actor.role !== 'student') throw new HttpsError('permission-denied', 'No puedes responder este examen.');
   await courseOf(actor, a.courseId); return ref;
 }
+export const examDocumentLink = wrap(async request => {
+  const actor = await actorOf(request);
+  const ref = await checkAttempt(actor, request.data.attemptId);
+  const attempt = (await ref.get()).data();
+  const expires = Math.min(attempt.deadlineAt, Date.now() + 5 * 60000);
+  if (attempt.status !== 'in-progress' || expires <= Date.now() || !attempt.document) throw new HttpsError('permission-denied', 'El PDF solo está disponible durante el examen.');
+  if (!attempt.document.path.startsWith(`courses/${attempt.courseId}/files/`) || attempt.document.path.includes('..')) throw new HttpsError('permission-denied', 'Documento no válido.');
+  const [url] = await getStorage().bucket().file(attempt.document.path).getSignedUrl({ version: 'v4', action: 'read', expires });
+  return { url, watermark: `${actor.displayName} · ${actor.studentCode || actor.id}`, expiresAt: expires };
+});
 export const saveAnswers = wrap(async request => {
   const actor = await actorOf(request); const ref = await checkAttempt(actor, request.data.attemptId);
   return db.runTransaction(async tx => {

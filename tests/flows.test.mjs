@@ -52,8 +52,8 @@ test('Los correos duplicados se detectan sin distinguir mayúsculas',async()=>{
   const {service}=await setup();await service.saveUser(newStudent());
   await assert.rejects(()=>service.saveUser(newStudent({email:' NUEVO@EXAMPLE.COM '})),{code:'already-exists'});
 });
-test('Un docente crea alumnos pero no puede crear otros docentes',async()=>{
-  const {service}=await setup();await service.signInDemo('teacher');await service.saveUser(newStudent());
+test('Solo el propietario crea accesos para alumnos y docentes',async()=>{
+  const {service}=await setup();await service.signInDemo('teacher');await assert.rejects(()=>service.saveUser(newStudent()),{code:'permission-denied'});
   await assert.rejects(()=>service.saveUser(newStudent({email:'t@example.com',role:'teacher',courseIds:[]})),{code:'permission-denied'});
 });
 test('El docente no puede conceder acceso a un curso de otro responsable',async()=>{
@@ -82,6 +82,18 @@ test('Retomar un examen conserva el inicio, el límite y las respuestas guardada
   const {attempt}=await service.startExam('math-3','exam-math');await service.saveAnswers(attempt.id,{q1:1});now+=60000;
   const resumed=(await service.startExam('math-3','exam-math')).attempt;
   assert.equal(resumed.deadlineAt,attempt.deadlineAt);assert.equal(resumed.answers.q1,1);assert.equal(service.state.attempts.length,1);
+});
+
+test('El PDF queda fijado al intento y no se entrega después del vencimiento ni a otro alumno',async()=>{
+  let now=1000000;const {service}=await setup(()=>now);
+  const document={path:'math-3/file/examen.pdf',filename:'Examen.pdf',size:2000,mimetype:'application/pdf'};
+  const exam=await service.saveExam('math-3',{title:'Examen con documento',minutes:10,published:true,module:'Semestre I',document,questions:[{prompt:'Resuelve el problema del PDF',options:['A','B'],correct:0,points:1}]});
+  await service.signInDemo('secondary');const {attempt}=await service.startExam('math-3',exam.id);
+  assert.deepEqual(attempt.document,document);
+  await service.signInDemo('owner');await service.saveExam('math-3',{...await service.examForEditor('math-3',exam.id),document:null},exam.id);
+  await service.signInDemo('secondary');assert.deepEqual((await service.startExam('math-3',exam.id)).attempt.document,document);
+  now=attempt.deadlineAt;await assert.rejects(()=>service.examDocumentLink(attempt.id));
+  await service.signInDemo('university');await assert.rejects(()=>service.examDocumentLink(attempt.id),{code:'permission-denied'});
 });
 test('Al vencer el tiempo se califican únicamente respuestas guardadas a tiempo',async()=>{
   let now=1000000;const {service}=await setup(()=>now);await service.signInDemo('secondary');const {attempt}=await service.startExam('math-3','exam-math');

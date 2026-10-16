@@ -19,3 +19,7 @@ dialog{border:1px solid var(--line);box-shadow:0 24px 90px #12244033}dialog::bac
 @media(min-width:1500px){.app-shell{grid-template-columns:260px minmax(0,1fr)}.main{padding-left:48px;padding-right:48px}}
 @media(max-width:760px){.main{padding:24px 20px}.topbar{height:66px}.welcome{padding:24px;min-height:220px}.welcome h2{font-size:26px}.stat{padding:16px}.stat strong{font-size:25px}.login-content h2{font-size:27px}.login-story h1{font-size:38px;letter-spacing:-1.5px}.searchbox{padding:0 5px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+.setup-notice{padding:14px 18px;border:1px solid #efd596;background:#fff8e8;border-radius:12px;color:#654b18;margin-bottom:24px;font-size:13px}.setup-notice strong{display:block}
+.exam-answer-area{min-width:0}.exam-document{padding:22px;border-bottom:1px solid var(--line);overflow:hidden}.exam-document canvas{display:block;max-width:100%;height:auto;margin:16px auto;background:#fff;box-shadow:0 2px 12px #12244018}.pdf-controls{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px}.pdf-controls span{font-size:13px;color:var(--muted)}
+@media(max-width:600px){.exam-document{padding:14px}.pdf-controls .button{font-size:12px;padding:7px 10px}.login-content{min-width:0}.login-content-inner{max-width:100%}.topbar-tools{min-width:0}.course-header h1{overflow-wrap:anywhere}}
+@media print{.exam-dialog,.exam-document{display:none!important}}

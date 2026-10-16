@@ -1,5 +1,7 @@
 # AulaNexo · aula virtual
 
+**Actualización:** el sitio público ahora utiliza ingreso real por Firebase, sin botones de demostración. Solo el propietario crea cuentas. El código de PDF para exámenes está implementado; la administración, las subidas y los exámenes reales quedan pendientes del despliegue de Functions/Storage, actualmente bloqueado por el plan Spark. Ver el estado actualizado antes de utilizarlo con alumnos.
+
 ## Presentación en GitHub Pages
 
 La publicación se realiza automáticamente desde `main` mediante `.github/workflows/pages.yml`. Publica solamente la interfaz de `dist`, sin archivos de configuración de producción adicionales ni credenciales administrativas.

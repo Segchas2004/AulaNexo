@@ -59,6 +59,7 @@ export class FirebaseAdapter {
     return { message: 'Si el correo tiene una cuenta habilitada, recibirás las instrucciones para recuperar el acceso.' };
   }
   async call(name, data) {
+    if (config.backendReady === false) throw new AppError('El ingreso ya está habilitado. Falta activar Blaze y desplegar el backend para administrar usuarios, cursos y archivos.', 'failed-precondition');
     const result = await this.sdk.functions.httpsCallable(this.functions, name)(data);
     return result.data;
   }
@@ -193,6 +194,7 @@ export class FirebaseAdapter {
   async saveMaterial(courseId, input) { return this.call('saveMaterial', { courseId, ...validateMaterial(input) }); }
   async deleteMaterial(courseId, id) { return this.call('deleteMaterial', { courseId, id }); }
   async upload(courseId, file, progress = () => {}, { assignmentId = null, signal = null } = {}) {
+    if (config.backendReady === false) throw new AppError('Las subidas compartidas requieren activar Blaze y desplegar Firebase Storage.');
     const metadata = fileMetadata(file, assignmentId ? 50 * 1024 ** 2 : undefined);
     if (signal?.aborted) throw new AppError('Subida cancelada.');
     const { ref, uploadBytesResumable } = this.sdk.storage;
@@ -209,6 +211,7 @@ export class FirebaseAdapter {
   async saveExam(courseId, input, id = null) { return this.call('saveExam', { courseId, ...validateExam(input), id }); }
   async examForEditor(courseId, id) { return this.call('examForEditor', { courseId, id }); }
   async startExam(courseId, examId) { return this.call('startExam', { courseId, examId }); }
+  async examDocumentLink(attemptId) { return this.call('examDocumentLink', { attemptId }); }
   async saveAnswers(attemptId, answers) { return this.call('saveAnswers', { attemptId, answers }); }
   async submitExam(attemptId, answers) { return this.call('submitExam', { attemptId, answers }); }
   async saveSession(courseId, input, id = null) { return this.call('saveSession', { courseId, ...validateSession(input), id }); }

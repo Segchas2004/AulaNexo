@@ -8,6 +8,6 @@ if (!process.argv.includes('--backend-ready')) {
 }
 const { apiKey, authDomain, projectId, storageBucket, messagingSenderId, appId } = JSON.parse(readFileSync(resolve(root, 'dist/firebase-config.production.json'), 'utf8'));
 if (!apiKey || !projectId || !appId) throw new Error('Configuración web incompleta.');
-writeFileSync(resolve(root, 'dist/firebase-config.js'), 'export const config = ' + JSON.stringify({ firebase: { apiKey, authDomain, projectId, storageBucket, messagingSenderId, appId }, functionsRegion:'us-central1', emulators:null }, null, 2) + ';\n');
+writeFileSync(resolve(root, 'dist/firebase-config.js'), 'export const config = ' + JSON.stringify({ firebase: { apiKey, authDomain, projectId, storageBucket, messagingSenderId, appId }, functionsRegion:'us-central1', emulators:null, backendReady:true }, null, 2) + ';\n');
 writeFileSync(resolve(root, 'functions/.env'), `FIREBASE_WEB_API_KEY=${apiKey}\n`);
 console.log('Conexión real activada localmente. Verifica con npm run check antes de publicar.');
